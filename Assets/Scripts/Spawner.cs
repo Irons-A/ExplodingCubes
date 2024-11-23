@@ -1,51 +1,43 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Android.Types;
 using UnityEngine;
+
+[RequireComponent(typeof(CubeCore))]
 
 public class Spawner : MonoBehaviour
 {
-    [SerializeField] private CubeCore _cubeCore;
-    [SerializeField] private GameObject _cubeToSpawn;
+    public event Action<List<Rigidbody>> ObjectExploding;
+
+    [SerializeField] private CubeCore _cubeToSpawn;
+
+    private CubeCore _initialCube;
 
     private void Awake()
     {
         if (TryGetComponent(out CubeCore component))
         {
-            _cubeCore = component;
+            _initialCube = component;
         }
     }
-
     private void OnEnable()
     {
-        _cubeCore.ObjectSplitting += SpawnFragments;
+        _initialCube.ObjectSplitting += SpawnFragments;
     }
-
     private void OnDisable()
     {
-        _cubeCore.ObjectSplitting -= SpawnFragments;
+        _initialCube.ObjectSplitting -= SpawnFragments;
     }
 
-    private List<Rigidbody> SpawnFragments(int minFragmentSpawnAmount, int maxFragmentSpawnAmount, float scaleMinifier, float splitChance, float splitChanceMinifier)
+    private void SpawnFragments(int fragmentCount, float newSplitChance, Vector3 newScale)
     {
-        int fragmentCount = Random.Range(minFragmentSpawnAmount, maxFragmentSpawnAmount + 1);
-        float newSplitChance = splitChance / splitChanceMinifier;
         List<Rigidbody> affectedObjects = new();
 
         for (int i = 0; i < fragmentCount; i++)
         {
-            GameObject fragment = Instantiate(_cubeToSpawn);
-            fragment.transform.localScale = transform.localScale / scaleMinifier;
-
-            if (TryGetComponent(out CubeCore theCC))
-            {
-                theCC.SetSplitChance(newSplitChance);
-            }
-
-            if (TryGetComponent(out MeshRenderer theMR))
-            {
-                theMR.material.color = Random.ColorHSV();
-            }
+            CubeCore fragment = Instantiate(_cubeToSpawn);
+            fragment.transform.localScale = newScale;
+            fragment.SetSplitChance(newSplitChance);
 
             if (fragment.TryGetComponent(out Rigidbody theRB))
             {
@@ -53,6 +45,6 @@ public class Spawner : MonoBehaviour
             }
         }
 
-        return affectedObjects;
+        ObjectExploding?.Invoke(affectedObjects);
     }
 }
