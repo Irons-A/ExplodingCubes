@@ -29,7 +29,7 @@ public class Spawner : MonoBehaviour
         _initialCube.ObjectSplitting -= SpawnFragments;
     }
 
-    private void SpawnFragments(int fragmentCount, float newSplitChance, Vector3 newScale)
+    private void SpawnFragments(int fragmentCount, float newSplitChance, Vector3 newScale, float newExplosionPower, float newExplosionRadius)
     {
         List<Rigidbody> affectedObjects = new();
 
@@ -38,6 +38,7 @@ public class Spawner : MonoBehaviour
             CubeCore fragment = Instantiate(_cubeToSpawn);
             fragment.transform.localScale = newScale;
             fragment.SetSplitChance(newSplitChance);
+            fragment.SetExplosionPower(newExplosionPower, newExplosionRadius);
 
             if (fragment.TryGetComponent(out Rigidbody theRB))
             {

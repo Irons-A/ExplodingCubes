@@ -9,13 +9,17 @@ using Random = UnityEngine.Random;
 
 public class CubeCore : MonoBehaviour
 {
-    public event Action<int, float, Vector3> ObjectSplitting;
+    public event Action<int, float, Vector3, float, float> ObjectSplitting;
+    public event Action<List<Rigidbody>, float, float> TriggeringFinalExplosion;
 
     [SerializeField] private int _minFragmentSpawnAmount = 2;
     [SerializeField] private int _maxFragmentSpawnAmount = 6;
     [SerializeField] private float _scaleMinifier = 2f;
     [SerializeField] private float _splitChanceMinifier = 2f;
     [SerializeField] private float _splitChance = 100f;
+    [SerializeField] private float _explosionPower = 100f;
+    [SerializeField] private float _explosionRadius = 100f;
+    [SerializeField] private float _explosionPowerMultiplier = 2f;
 
     private float _randomFloor = 0f;
     private float _randomCeiling = 100f;
@@ -34,8 +38,14 @@ public class CubeCore : MonoBehaviour
             float newSplitChance = _splitChance / _splitChanceMinifier;
             int fragmentCount = Random.Range(_minFragmentSpawnAmount, _maxFragmentSpawnAmount + 1);
             Vector3 newScale = transform.localScale / _scaleMinifier;
+            float newExplosionPower = _explosionPower * _explosionPowerMultiplier;
+            float newExplosionRadius = _explosionRadius * _explosionPowerMultiplier;
 
-            ObjectSplitting?.Invoke(fragmentCount, newSplitChance, newScale);
+            ObjectSplitting?.Invoke(fragmentCount, newSplitChance, newScale, newExplosionPower, newExplosionRadius);
+        }
+        else
+        {
+            TriggeringFinalExplosion?.Invoke(GetAffectedObjects(), _explosionPower, _explosionRadius);
         }
 
         Destroy(gameObject);
@@ -44,5 +54,28 @@ public class CubeCore : MonoBehaviour
     public void SetSplitChance(float newSplitChance)
     {
         _splitChance = newSplitChance;
+    }
+
+    public void SetExplosionPower(float newExplosionPower, float newExplosionRadius)
+    {
+        _explosionPower = newExplosionPower;
+        _explosionRadius = newExplosionRadius;
+    }
+
+    private List<Rigidbody> GetAffectedObjects()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, _explosionRadius);
+
+        List<Rigidbody> affectedObjects = new();
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.attachedRigidbody != null)
+            {
+                affectedObjects.Add(hit.attachedRigidbody);
+            }
+        }
+
+        return affectedObjects;
     }
 }
