@@ -7,11 +7,11 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    public event Action<List<Rigidbody>> ObjectExploding;
-
     [SerializeField] private CubeCore _cubeToSpawn;
 
     private CubeCore _initialCube;
+
+    public event Action<List<Rigidbody>> ObjectExploding;
 
     private void Awake()
     {
@@ -37,8 +37,7 @@ public class Spawner : MonoBehaviour
         {
             CubeCore fragment = Instantiate(_cubeToSpawn);
             fragment.transform.localScale = newScale;
-            fragment.SetSplitChance(newSplitChance);
-            fragment.SetExplosionPower(newExplosionPower, newExplosionRadius);
+            fragment.SetParametersOnSpawn(newExplosionPower, newExplosionRadius, newSplitChance);
 
             if (fragment.TryGetComponent(out Rigidbody theRB))
             {

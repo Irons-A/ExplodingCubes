@@ -9,9 +9,6 @@ using Random = UnityEngine.Random;
 
 public class CubeCore : MonoBehaviour
 {
-    public event Action<int, float, Vector3, float, float> ObjectSplitting;
-    public event Action<List<Rigidbody>, float, float> TriggeringFinalExplosion;
-
     [SerializeField] private int _minFragmentSpawnAmount = 2;
     [SerializeField] private int _maxFragmentSpawnAmount = 6;
     [SerializeField] private float _scaleMinifier = 2f;
@@ -23,6 +20,9 @@ public class CubeCore : MonoBehaviour
 
     private float _randomFloor = 0f;
     private float _randomCeiling = 100f;
+
+    public event Action<int, float, Vector3, float, float> ObjectSplitting;
+    public event Action<List<Rigidbody>, float, float> TriggeringFinalExplosion;
 
     private void Awake()
     {
@@ -51,15 +51,11 @@ public class CubeCore : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void SetSplitChance(float newSplitChance)
-    {
-        _splitChance = newSplitChance;
-    }
-
-    public void SetExplosionPower(float newExplosionPower, float newExplosionRadius)
+    public void SetParametersOnSpawn(float newExplosionPower, float newExplosionRadius, float newSplitChance)
     {
         _explosionPower = newExplosionPower;
         _explosionRadius = newExplosionRadius;
+        _splitChance = newSplitChance;
     }
 
     private List<Rigidbody> GetAffectedObjects()
