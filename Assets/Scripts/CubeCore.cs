@@ -14,19 +14,31 @@ public class CubeCore : MonoBehaviour
     [SerializeField] private float _scaleMinifier = 2f;
     [SerializeField] private float _splitChanceMinifier = 2f;
     [SerializeField] private float _splitChance = 100f;
-    [SerializeField] private float _explosionPower = 100f;
-    [SerializeField] private float _explosionRadius = 100f;
     [SerializeField] private float _explosionPowerMultiplier = 2f;
 
     private float _randomFloor = 0f;
     private float _randomCeiling = 100f;
 
-    public event Action<int, float, Vector3, float, float> ObjectSplitting;
-    public event Action<List<Rigidbody>, float, float> TriggeringFinalExplosion;
+    public event Action<CubeCore> ObjectSplitting;
+    public event Action<CubeCore> TriggeringFinalExplosion;
+
+    public float newSplitChance { get; private set; }
+    public int fragmentCount { get; private set; }
+    public Vector3 newScale { get; private set; }
+    public float newExplosionPower { get; private set; }
+    public float newExplosionRadius { get; private set; }
+    public CubeCore cubeCore { get; private set; }
+    public Rigidbody rigidBody { get; private set; }
+    public List<Rigidbody> affectedObjects { get; private set; }
+    public float explosionPower { get; private set; } = 100f;
+    public float explosionRadius { get; private set; } = 100f;
 
     private void Awake()
     {
         GetComponent<Renderer>().material.color = Random.ColorHSV();
+        cubeCore = GetComponent<CubeCore>();
+        rigidBody = GetComponent<Rigidbody>();
+        affectedObjects = new List<Rigidbody>();
     }
 
     private void OnMouseUpAsButton()
@@ -35,17 +47,18 @@ public class CubeCore : MonoBehaviour
 
         if (splitChanceGamble <= _splitChance)
         {
-            float newSplitChance = _splitChance / _splitChanceMinifier;
-            int fragmentCount = Random.Range(_minFragmentSpawnAmount, _maxFragmentSpawnAmount + 1);
-            Vector3 newScale = transform.localScale / _scaleMinifier;
-            float newExplosionPower = _explosionPower * _explosionPowerMultiplier;
-            float newExplosionRadius = _explosionRadius * _explosionPowerMultiplier;
+            newSplitChance = _splitChance / _splitChanceMinifier;
+            fragmentCount = Random.Range(_minFragmentSpawnAmount, _maxFragmentSpawnAmount + 1);
+            newScale = transform.localScale / _scaleMinifier;
+            newExplosionPower = explosionPower * _explosionPowerMultiplier;
+            newExplosionRadius = explosionRadius * _explosionPowerMultiplier;
 
-            ObjectSplitting?.Invoke(fragmentCount, newSplitChance, newScale, newExplosionPower, newExplosionRadius);
+            ObjectSplitting?.Invoke(cubeCore);
         }
         else
         {
-            TriggeringFinalExplosion?.Invoke(GetAffectedObjects(), _explosionPower, _explosionRadius);
+            GetAffectedObjects();
+            TriggeringFinalExplosion?.Invoke(cubeCore);
         }
 
         Destroy(gameObject);
@@ -53,16 +66,14 @@ public class CubeCore : MonoBehaviour
 
     public void SetParametersOnSpawn(float newExplosionPower, float newExplosionRadius, float newSplitChance)
     {
-        _explosionPower = newExplosionPower;
-        _explosionRadius = newExplosionRadius;
+        explosionPower = newExplosionPower;
+        explosionRadius = newExplosionRadius;
         _splitChance = newSplitChance;
     }
 
-    private List<Rigidbody> GetAffectedObjects()
+    private void GetAffectedObjects()
     {
-        Collider[] hits = Physics.OverlapSphere(transform.position, _explosionRadius);
-
-        List<Rigidbody> affectedObjects = new();
+        Collider[] hits = Physics.OverlapSphere(transform.position, explosionRadius);
 
         foreach (Collider hit in hits)
         {
@@ -71,7 +82,5 @@ public class CubeCore : MonoBehaviour
                 affectedObjects.Add(hit.attachedRigidbody);
             }
         }
-
-        return affectedObjects;
     }
 }

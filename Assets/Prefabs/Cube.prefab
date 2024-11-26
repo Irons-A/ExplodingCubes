@@ -153,6 +153,9 @@ MonoBehaviour:
   _scaleMinifier: 2
   _splitChanceMinifier: 2
   _splitChance: 100
+  _explosionPower: 100
+  _explosionRadius: 100
+  _explosionPowerMultiplier: 2
 --- !u!114 &-1600447659777456455
 MonoBehaviour:
   m_ObjectHideFlags: 0

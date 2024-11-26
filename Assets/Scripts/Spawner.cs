@@ -29,20 +29,16 @@ public class Spawner : MonoBehaviour
         _initialCube.ObjectSplitting -= SpawnFragments;
     }
 
-    private void SpawnFragments(int fragmentCount, float newSplitChance, Vector3 newScale, float newExplosionPower, float newExplosionRadius)
+    private void SpawnFragments(CubeCore cubeCore)
     {
         List<Rigidbody> affectedObjects = new();
 
-        for (int i = 0; i < fragmentCount; i++)
+        for (int i = 0; i < cubeCore.fragmentCount; i++)
         {
             CubeCore fragment = Instantiate(_cubeToSpawn);
-            fragment.transform.localScale = newScale;
-            fragment.SetParametersOnSpawn(newExplosionPower, newExplosionRadius, newSplitChance);
-
-            if (fragment.TryGetComponent(out Rigidbody theRB))
-            {
-                affectedObjects.Add(theRB);
-            }
+            fragment.transform.localScale = cubeCore.newScale;
+            fragment.SetParametersOnSpawn(cubeCore.newExplosionPower, cubeCore.newExplosionRadius, cubeCore.newSplitChance);
+            affectedObjects.Add(cubeCore.rigidBody);
         }
 
         ObjectExploding?.Invoke(affectedObjects);

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Spawner))]
 [RequireComponent(typeof(CubeCore))]
 
 public class Exploder : MonoBehaviour
@@ -12,7 +11,7 @@ public class Exploder : MonoBehaviour
 
     private void Awake()
     {
-        _spawner = GetComponent<Spawner>();
+        _spawner = FindObjectOfType<Spawner>();
         _cubeCore = GetComponent<CubeCore>();
     }
     private void OnEnable()
@@ -34,11 +33,11 @@ public class Exploder : MonoBehaviour
         }
     }
 
-    private void Explode(List<Rigidbody> affectedObjects, float explosionPower, float explosionRadius)
+    private void Explode(CubeCore cubeCore)
     {
-        foreach (Rigidbody affectedObject in affectedObjects)
+        foreach (Rigidbody affectedObject in cubeCore.affectedObjects)
         {
-            affectedObject.AddExplosionForce(explosionPower, transform.position, explosionRadius);
+            affectedObject.AddExplosionForce(cubeCore.explosionPower, transform.position, cubeCore.explosionRadius);
         }
     }
 }
